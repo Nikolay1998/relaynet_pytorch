@@ -47,7 +47,6 @@ class DiceLoss(_Loss):
             ignore_index : int index to ignore from loss
             """
         eps = 0.0001
-
         output = output.exp()
         encoded_target = output.detach() * 0
         if ignore_index is not None:
@@ -58,6 +57,10 @@ class DiceLoss(_Loss):
             mask = mask.unsqueeze(1).expand_as(encoded_target)
             encoded_target[mask] = 0
         else:
+            #encoded_target.unsqueeze(1)
+            #target.unsqueeze(1)
+            #print(target.shape)
+            #print(encoded_target.shape)
             encoded_target.scatter_(1, target.unsqueeze(1), 1)
 
         if weights is None:

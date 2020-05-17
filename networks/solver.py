@@ -84,7 +84,6 @@ class Solver(object):
         create_exp_directory(exp_dir_name)
 
         for epoch in range(num_epochs):
-            scheduler.step()
             for i_batch, sample_batched in enumerate(train_loader):
                 X = Variable(sample_batched[0])
                 y = Variable(sample_batched[1])
@@ -98,13 +97,14 @@ class Solver(object):
                     optim.zero_grad()
                     output = model(X)
                     loss = self.loss_func(output, y, w)
+                    torch.cuda.set_device(0)
                     loss.backward()
                     optim.step()
                     if iter % log_nth == 0:
-                        self.train_loss_history.append(loss.data[0])
+                        self.train_loss_history.append(loss.data)
                         print('[Iteration : ' + str(iter) + '/' + str(iter_per_epoch * num_epochs) + '] : ' + str(
-                            loss.data[0]))
-
+                            loss.data))
+            scheduler.step()
 
                 #_, batch_output = torch.max(F.softmax(model(X),dim=1), dim=1)
                 #avg_dice = per_class_dice(batch_output, y, self.NumClass)
@@ -114,6 +114,6 @@ class Solver(object):
                 # val_output = torch.max(model(Variable(torch.from_numpy(val_loader.dataset.X))), dim= 1)
                 # val_accuracy = self.accuracy(val_output[1], Variable(torch.from_numpy(val_loader.dataset.y)))
                 # self.val_acc_history.append(val_accuracy)
-            print('[Epoch : ' + str(epoch) + '/' + str(num_epochs) + '] : ' + str(loss.data[0]))
+            print('[Epoch : ' + str(epoch) + '/' + str(num_epochs) + '] : ' + str(loss.data))
             model.save('models/' + exp_dir_name + '/relaynet_epoch' + str(epoch + 1) + '.model')
         print('FINISH.')

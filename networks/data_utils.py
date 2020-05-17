@@ -67,21 +67,21 @@ def get_imdb_data():
     # Te_weights = weights[test_id, :, :, :]
     # Te_weights = np.tile(Te_weights, [1, NumClass, 1, 1])
 
-    Data = scipy.io.loadmat('C:/Users/krive/PycharmProjects/relaynet_pytorch/datasets/imgTest.mat')
-    Data = Data['img']
-    Data = np.transpose(Data, (2, 0, 1))
+    input = scipy.io.loadmat('C:/Users/MASTER/PycharmProjects/inputParser/img.mat')
+    Data = input['img']
     sz = Data.shape
     print(sz)
     Data = Data.reshape(sz[0], 1, sz[1], sz[2])
-    Data = Data[:, :, :, :]
-    lbl = scipy.io.loadmat('C:/Users/krive/PycharmProjects/relaynet_pytorch/datasets/lblgTest.mat')
-    lbl = lbl['img']
-    lbl = np.transpose(lbl, (2, 0, 1))
+    Data = Data[:, :, 128:640, 120:376]
+    lbl = scipy.io.loadmat('C:/Users/MASTER/PycharmProjects/inputParser/label.mat')
+    lbl = lbl['label']
     sz = lbl.shape
     print(sz)
-    lbl = lbl.reshape(sz[0], 1, sz[1], sz[2])
-    lbl = lbl[:, :, :, :]
+    lbl = lbl.reshape(sz[0], sz[1], sz[2])
+    lbl = lbl[:, 128:640, 120:376]
     weights = lbl
-
+    Data = Data.astype(np.float32)
+    lbl = lbl.astype(np.float32)
+    weights = lbl.astype(np.float32) - 1
     return (ImdbData(Data, lbl, weights),
             ImdbData(Data, lbl, weights))
