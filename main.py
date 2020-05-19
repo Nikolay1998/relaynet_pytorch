@@ -4,6 +4,9 @@ import numpy as np
 import torch
 from torch.autograd import Variable
 import h5py
+
+from networks import solver
+from networks.net_api.losses import CombinedLoss
 from networks.relay_net import ReLayNet
 from networks.solver import Solver
 from networks.data_utils import get_imdb_data
@@ -44,18 +47,24 @@ train_data, test_data = get_imdb_data()
 print("Train size: %i" % len(train_data))
 print("Test size: %i" % len(test_data))
 
-img_test = test_data.X[0:1]
+img_test = train_data.X[10:11]
 
 img_test = np.squeeze(img_test)
 print(img_test.shape)
 plt.imshow(img_test)
 plt.show()
 
-relaynet_model = torch.load('C:/Users/MASTER/PycharmProjects/relaynet_pytorch2//models/Exp02/relaynet_epoch3.model', map_location=torch.device('cpu'))
+relaynet_model = torch.load('C:/Users/MASTER/PycharmProjects/relaynet_pytorch2//models/Exp06/relaynet_epoch20.model', map_location=torch.device('cuda'))
 relaynet_model.cuda()
 with torch.no_grad():
-    out = relaynet_model(Variable(torch.Tensor(test_data.X[10:11]).cuda()))
-out = F.softmax(out,dim=1)
+    out = relaynet_model(Variable(torch.Tensor(train_data.X[10:11]).cuda()))
+loss_func = CombinedLoss()
+X = torch.from_numpy(np.array(train_data.X[10:11]))
+y = torch.from_numpy(np.array(train_data.y[10:11]))
+w = torch.from_numpy(np.array(train_data.w[10:11]))
+loss = loss_func(out, y.cuda(), w.cuda())
+print(loss)
+out = F.softmax(out, dim=1)
 max_val, idx = torch.max(out,1)
 idx = idx.data.cpu().numpy()
 idx = label_img_to_rgb(idx)

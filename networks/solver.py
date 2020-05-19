@@ -72,18 +72,19 @@ class Solver(object):
                                         gamma=self.gamma)  # decay LR by a factor of 0.5 every 5 epochs
 
         self._reset_histories()
-        iter_per_epoch = 1
+        #iter_per_epoch = 1
         # iter_per_epoch = len(train_loader)
 
         if torch.cuda.is_available():
             model.cuda()
 
         print('START TRAIN.')
-        curr_iter = 0
+
 
         create_exp_directory(exp_dir_name)
 
         for epoch in range(num_epochs):
+            curr_iter = 0
             for i_batch, sample_batched in enumerate(train_loader):
                 X = Variable(sample_batched[0])
                 y = Variable(sample_batched[1])
@@ -92,19 +93,32 @@ class Solver(object):
                 if model.is_cuda:
                     X, y, w = X.cuda(), y.cuda(), w.cuda()
 
-                for iter in range(iter_per_epoch):
-                    curr_iter += iter
-                    optim.zero_grad()
-                    output = model(X)
-                    loss = self.loss_func(output, y, w)
-                    torch.cuda.set_device(0)
-                    loss.backward()
-                    optim.step()
-                    if iter % log_nth == 0:
-                        self.train_loss_history.append(loss.data)
-                        print('[Iteration : ' + str(iter) + '/' + str(iter_per_epoch * num_epochs) + '] : ' + str(
-                            loss.data))
+                #for iter in range(iter_per_epoch):
+                #curr_iter += iter
+                optim.zero_grad()
+                output = model(X)
+                loss = self.loss_func(output, y, w)
+                torch.cuda.set_device(0)
+                loss.backward()
+                optim.step()
+                if curr_iter % log_nth == 0:
+                    self.train_loss_history.append(loss.data)
+                    print('[Iteration : ' + str(curr_iter) + '/' + str(25) + '] : ' + str(
+                        loss.data))
+                curr_iter = curr_iter + 1
             scheduler.step()
+
+            for i_batch, sample_batched in enumerate(val_loader):
+                X = Variable(sample_batched[0])
+                y = Variable(sample_batched[1])
+                w = Variable(sample_batched[2])
+
+                if model.is_cuda:
+                    X, y, w = X.cuda(), y.cuda(), w.cuda()
+
+                output = model(X)
+                valloss = self.loss_func(output, y, w)
+                print('Validation loss: ' + str(valloss.data))
 
                 #_, batch_output = torch.max(F.softmax(model(X),dim=1), dim=1)
                 #avg_dice = per_class_dice(batch_output, y, self.NumClass)

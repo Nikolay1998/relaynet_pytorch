@@ -25,7 +25,7 @@ if __name__ == '__main__':
             'num_class': 9
         }
 
-        exp_dir_name = 'Exp02'
+        exp_dir_name = 'Exp06'
 
         relaynet_model = ReLayNet(param)
         solver = Solver(optim_args={"lr": 1e-2})

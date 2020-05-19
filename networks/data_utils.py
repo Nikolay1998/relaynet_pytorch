@@ -70,18 +70,25 @@ def get_imdb_data():
     input = scipy.io.loadmat('C:/Users/MASTER/PycharmProjects/inputParser/img.mat')
     Data = input['img']
     sz = Data.shape
-    print(sz)
     Data = Data.reshape(sz[0], 1, sz[1], sz[2])
-    Data = Data[:, :, 128:640, 120:376]
+    testData = Data[100:110, :, 128:640, 120:376]
+    trainData = Data[0:100, :, 128:640, 120:376]
     lbl = scipy.io.loadmat('C:/Users/MASTER/PycharmProjects/inputParser/label.mat')
     lbl = lbl['label']
     sz = lbl.shape
-    print(sz)
     lbl = lbl.reshape(sz[0], sz[1], sz[2])
-    lbl = lbl[:, 128:640, 120:376]
-    weights = lbl
-    Data = Data.astype(np.float32)
-    lbl = lbl.astype(np.float32)
-    weights = lbl.astype(np.float32) - 1
-    return (ImdbData(Data, lbl, weights),
-            ImdbData(Data, lbl, weights))
+    trainlbl = lbl[0:100, 128:640, 120:376]
+    testlbl = lbl[100:110, 128:640, 120:376]
+    weights = scipy.io.loadmat('C:/Users/MASTER/PycharmProjects/inputParser/weights.mat')
+    weights = weights['weights']
+    weights = weights.reshape(sz[0], sz[1], sz[2])
+    trainweights = weights[0:100, 128:640, 120:376]
+    testweignts = weights[100:110, 128:640, 120:376]
+    trainData = trainData.astype(np.float32)
+    testData = testData.astype(np.float32)
+    trainlbl = trainlbl.astype(np.float32)
+    testlbl = testlbl.astype(np.float32)
+    trainweights = trainweights.astype(np.float32)
+    testweights = testweignts.astype(np.float32)
+    return (ImdbData(trainData, trainlbl, trainweights),
+            ImdbData(testData, testlbl, testweights))
